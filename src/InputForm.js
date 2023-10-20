@@ -156,45 +156,40 @@ const InputForm = () => {
     };
     
 
-      const handleSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError('');
-        setGeneratedComment("");
-      
-        try {
-          const performanceScores = sliders
-            .filter((slider) => slider.name)
-            .map((slider) => `${slider.name}: ${sliderValues[slider.name] || 5}`)
-            .join(', ');
-      
-          const requestBody = {
-            prompt: `Generate a thoughtful and detailed report card comment for ${studentName} studying grade ${grade} ${subject}. Refer to the student's specific performance, based on: ${performanceScores}, but do not refer to the actual numbers. Provide relevant recommendations based on their performance. Draw upon the writing style of this sample: "${writingSample}". Comment:`,
-            max_tokens: 150,
-            temperature: 0.3,
-          };
-      
-          const config = {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${process.env.REACT_APP_API_KEY}`,
-            },
-          };
-      
-          const response = await axios.post(
-            "https://api.openai.com/v1/engines/text-davinci-003/completions",
-            requestBody,
-            config
-          );
-      
-          setLoading(false);
-          setGeneratedComment(response.data.choices[0].text.trim());
-        } catch (error) {
-          setLoading(false);
-          setError('Error generating comment: ' + error.message); // Update this line
-          console.error("Error generating comment:", error);
-        }
-      };      
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      setLoading(true);
+      setError('');
+      setGeneratedComment("");
+    
+      try {
+        const performanceScores = sliders
+          .filter((slider) => slider.name)
+          .map((slider) => `${slider.name}: ${sliderValues[slider.name] || 5}`)
+          .join(', ');
+    
+        const requestBody = {
+          studentName: studentName,
+          grade: grade,
+          subject: subject,
+          performanceScores: performanceScores,
+          writingSample: writingSample
+        };
+    
+        const response = await axios.post(
+          "https://api.openai.com/v1/engines/text-davinci-003/completions",
+          requestBody
+        );
+    
+        setLoading(false);
+        setGeneratedComment(response.data.comment.trim());
+      } catch (error) {
+        setLoading(false);
+        setError('Error generating comment: ' + error.message);
+        console.error("Error generating comment:", error);
+      }
+    };
+    
     
     const gradeOptions = Array.from({ length: 12 }, (_, i) => i + 1);
 
